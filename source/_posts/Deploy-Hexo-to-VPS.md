@@ -5,11 +5,11 @@ tags:
 ---
 ## 创建 Hexo 项目
 ### 安装 Hexo 依赖
-**首先**你需要安装以下应用程序(官方教程)[https://hexo.io/zh-cn/docs/]：
+**首先**你需要安装以下应用程序[官方教程](https://hexo.io/zh-cn/docs/)：
 - [Node.js](http://nodejs.org/) (Node.js 版本需不低于 8.10，建议使用 Node.js 10.0 及以上版本)
 - [Git](http://git-scm.com/)
 
- 在 Mac 上安装软件，通常使用 (Homebrew)[https://brew.sh/index_zh-cn]，安装命令如下：
+ 在 Mac 上安装软件，通常使用 [Homebrew](https://brew.sh/index_zh-cn)，安装命令如下：
  ```bash
   /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
