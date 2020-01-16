@@ -5,7 +5,6 @@ if test $# -ge 1; then
         cd themes/cactus
         source update.sh
  	    cd -
-    	return 0
     fi 
 fi
 
