@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if test $# -ge 1; then
-    if test $1 -eq 'a'; then
+    if test $1 == '-a'; then
         cd themes/cactus
         source update.sh
  	cd ...
