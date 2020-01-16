@@ -1,11 +1,11 @@
 #!/bin/bash
 
 if test $# -ge 1; then
-    if test $1 == '-a'; then
+    if test $1 = '-a'; then
         cd themes/cactus
         source update.sh
- 	cd ...
-	return
+ 	    cd -
+    	return 0
     fi 
 fi
 
