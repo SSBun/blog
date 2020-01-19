@@ -2,6 +2,8 @@
 title: Arduino Uno 利用 ESP8266 实现 TCP透传
 date: 2019-11-24 17:41:54
 tags:
+categories:
+- hardware
 ---
 
 利用 Arduino Uno 的软串口和 ESP8266 进行通信，为 Arduion Uno 提供连接 WiFi 的能力。
