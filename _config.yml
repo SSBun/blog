@@ -99,4 +99,4 @@ theme: cactus
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: 'git'
-  repo: root@39.100.226.244:blog.git
+  repo: root@csl.cool:blog.git
