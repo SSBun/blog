@@ -5,6 +5,10 @@ tags:
 - hardware
 ---
 
+> 相关文档:
+> [MicroPython for ESP8266 官方文档](http://docs.micropython.org/en/latest/esp8266/quickref.html)
+> [PT-Thread (VSCode 插件)论坛](https://www.rt-thread.org/qa/forum.php)
+
 ## 1 安装 MicroPython 到 ESP8266
 
 ### 1.1 硬件准备
