@@ -10,7 +10,84 @@ categories:
 - hardware
 ---
 
+![](https://ssbun-lot.oss-cn-beijing.aliyuncs.com/img/20200525174425.png)
+
 ## 连接 WiFi
+
+通过 MicroPython 连接 WiFi 是一件非常简单的事情，Python 用起来要比 C/C++ 和 AT 命令简单的多。
+
+首先我们需要引入网络库 `network`，它提供了连接网络的功能。在 `STA_IF` 模式下允许我们作为终端连接其他的 WiFi
+
+```Python
+import network
+
+wlan = network.WLAN(network.STA_IF) # create station interface
+wlan.active(True)       # activate the interface
+wlan.scan()             # scan for access points
+wlan.isconnected()      # check if the station is connected to an AP
+wlan.connect('essid', 'password') # connect to an AP
+wlan.config('mac')      # get the interface's MAC adddress
+wlan.ifconfig()         # get the interface's IP/netmask/gw/DNS addresses
+```
+
+而在 `AT_IF` 模式下，则是我们作为 WiFi 热点，允许其他人连接我们。
+
+```Python
+import network
+
+ap = network.WLAN(network.AP_IF) # create access-point interface
+ap.active(True)         # activate the interface
+ap.config(essid='ESP-AP') # set the ESSID of the access point
+```
+
+官方提供了一个连接 WiFi 的常用代码，首先确认是否已经连接了 WiFi，如果没有的话，就会尝试连接 WiFi，不停的等待，知道连接 WiFi 成功
+
+```Python
+def do_connect():
+    import network
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+    if not wlan.isconnected():
+        print('connecting to network...')
+        wlan.connect('essid', 'password')
+        while not wlan.isconnected():
+            pass
+    print('network config:', wlan.ifconfig())
+```
+
+有时候我们的设备可能并不在一个地方，当环境发生改变时，我们就需要重新设置 WiFi 连接，我是预设了几个可能的 WiFi，当移动设备的时候，连接 WiFi 失败以后可以重试其他的 WiFi：
+
+```Python
+import network
+import time
+
+def connect_wifi():
+    print("")
+    retry_times = 10
+    wifis = {"No,thankyou-2": "beijing_newhome_11.3", "SSBun": "Bz123456"}
+    wifi = network.WLAN(network.STA_IF)
+    wifi.active(True)
+    while not wifi.isconnected():
+        for ssid, password in wifis.items():
+            print("ready connect to wifi: " + ssid)
+            wifi.connect(ssid, password)
+            retry = retry_times
+            success = True
+            while not wifi.isconnected():
+                retry -= 1
+                time.sleep(1)
+                print("...")
+                if retry <= 0:
+                    success = False
+                    break
+            if success:
+                print("connect WiFi:" + ssid + " success")
+                break
+            else:
+                print("connnect WiFi:" + ssid + " failure")
+    print(wifi.ifconfig())
+    return wifi
+```
 
 #### 💢开启 WiFi 时报错 OSError: Cannot set STA config
 
@@ -28,5 +105,122 @@ wlan.active(True)       # activate the interface
 wlan.scan()             # scan for access points
 ```
 
-
 ## 连接 MQTT
+
+### 安装 umqtt
+
+想要连接 mqtt 服务，我们需要安装 Python 库 `micropython-umqtt.simple`，在此之前我们需要先连接网络，然后进入 repl 环境，执行以下代码安装
+
+```bash
+>>> import upip
+>>> upip.install('micropython-umqtt.simple')
+```
+
+### MQTT 监听
+
+```Python
+import time
+from umqtt.simple import MQTTClient
+
+# Publish test messages e.g. with:
+# mosquitto_pub -t foo_topic -m hello
+
+# Received messages from subscriptions will be delivered to this callback
+def sub_cb(topic, msg):
+    print((topic, msg))
+
+def main(server="iot.eclipse.org"):   # test server : iot.eclipse.org
+    c = MQTTClient("RT-Thread", server)
+    c.set_callback(sub_cb)
+    c.connect()
+    c.subscribe(b"foo_topic")         # subscribe foo_topic tipic
+    while True:
+        if True:
+            # Blocking wait for message
+            c.wait_msg()
+        else:
+            # Non-blocking wait for message
+            c.check_msg()
+            # Then need to sleep to avoid 100% CPU usage (in a real
+            # app other useful actions would be performed instead)
+            time.sleep(1)
+
+    c.disconnect()
+
+if __name__ == "__main__":
+    main()
+```
+
+### MQTT 发布
+
+```Python
+from umqtt.simple import MQTTClient
+
+# Test reception e.g. with:
+# mosquitto_sub -t foo_topic
+
+def main(server="iot.eclipse.org"):
+    c = MQTTClient("SummerGift", server)
+    c.connect()
+    c.publish(b"foo_topic", b"Hello RT-Thread !!!")
+    c.disconnect()
+
+if __name__ == "__main__":
+    main()
+```
+
+### 方便的工具类
+
+```Python
+from umqtt.simple import MQTTClient
+
+# MQTT client
+class MQTTManager(object):
+    def __init__(self, name: str, server: str, port: str, topics: list, callback):
+        self.name = name
+        self.server = server
+        self.port = port
+        self.topics = topics
+        self.callback = callback
+        client = MQTTClient(name, server, port, "ssbun", "Bz550527534")
+        client.set_callback(callback)
+        client.connect()
+        for topic in topics:
+            client.subscribe(topic)
+        self.client = client
+
+    def send(self, topic: str, msg: str):
+        self.client.publish(topic, msg)
+    
+    def loop_msg(self):
+        while True:            
+            self.client.check_msg()
+            time.sleep(1)
+    def disconnect(self):
+        self.client.disconnect()
+
+# Receive topic message.
+def mqtt_callback(topic, msg):
+    msg = msg.lower()
+    if topic == TOPIC_SWITCH_1:
+        if msg == b"on":
+            led.value(0)
+        else:
+            led.value(1)
+
+def restart_mqtt():
+    try:
+        mqtt = MQTTManager(CLIENT_ID, SERVER, SERVER_PORT, [TOPIC_SWITCH_1], mqtt_callback)
+        # Loop listen message.
+        mqtt.loop_msg()
+    except:
+        restart_mqtt()
+
+def main():
+    restart_mqtt()
+    # Send message "ON" to topic TOPIC_SWITCH_1.
+    mqtt.send(TOPIC_SWITCH_1, "ON")
+        
+if __name__ == "__main__":
+    main()
+```
