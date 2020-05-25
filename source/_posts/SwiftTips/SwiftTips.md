@@ -2,8 +2,9 @@
 title: SwiftTips
 date: 2020-02-20 15:13:16
 tags:
-- Swift
 - iOS
+categories:
+- Swift tips
 ---
 
 > Swift 中的正常操作！！！

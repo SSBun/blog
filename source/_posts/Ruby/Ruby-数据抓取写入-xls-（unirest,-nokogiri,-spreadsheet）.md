@@ -2,7 +2,6 @@
 title: Ruby 数据抓取写入 xls（unirest, nokogiri, spreadsheet）
 date: 2017-03-13 10:14:00
 tags:
-- Ruby
 categories:
 - Ruby
 ---
