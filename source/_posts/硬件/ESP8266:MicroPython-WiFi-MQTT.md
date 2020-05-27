@@ -169,58 +169,69 @@ if __name__ == "__main__":
     main()
 ```
 
-### 方便的工具类
+### 实际使用示例
 
 ```Python
+from machine import Pin
+import uasyncio as asyncio
 from umqtt.simple import MQTTClient
 
-# MQTT client
-class MQTTManager(object):
-    def __init__(self, name: str, server: str, port: str, topics: list, callback):
-        self.name = name
-        self.server = server
-        self.port = port
-        self.topics = topics
-        self.callback = callback
-        client = MQTTClient(name, server, port, "ssbun", "Bz550527534")
-        client.set_callback(callback)
-        client.connect()
-        for topic in topics:
-            client.subscribe(topic)
-        self.client = client
+CLIENT_ID = 'ssbun_home_switch_1'
+SERVER = 'mqtt.server'
+SERVER_PORT = 1883
 
-    def send(self, topic: str, msg: str):
-        self.client.publish(topic, msg)
-    
-    def loop_msg(self):
-        while True:            
-            self.client.check_msg()
-            time.sleep(1)
-    def disconnect(self):
-        self.client.disconnect()
+TOPIC_SWITCH_1 = b'ssbun_switch_1'
 
-# Receive topic message.
+# pin2 控制 ESP8266 自带的那个蓝色 led
+led = Pin(2, Pin.OUT)
+
 def mqtt_callback(topic, msg):
+    # `topic` 接收到的主题
+    # `msg` 主题下更新的信息
     msg = msg.lower()
+    print(msg)
     if topic == TOPIC_SWITCH_1:
         if msg == b"on":
+            # 开启
             led.value(0)
         else:
+            # 关闭
             led.value(1)
 
-def restart_mqtt():
-    try:
-        mqtt = MQTTManager(CLIENT_ID, SERVER, SERVER_PORT, [TOPIC_SWITCH_1], mqtt_callback)
-        # Loop listen message.
-        mqtt.loop_msg()
-    except:
-        restart_mqtt()
+async def check_message(mqtt):    
+    while True:
+        # 检查主题是否有更新，会调用 `mqtt_callback`
+        mqtt.check_msg()
+        # 休眠 1s 再检查
+        await asyncio.sleep(1)
+
+async def ping_server(mqtt):
+    while True:
+        # ping mqtt 服务器保持连接
+        mqtt.ping()
+        print("ping server ...")
+        await asyncio.sleep(30)
 
 def main():
-    restart_mqtt()
-    # Send message "ON" to topic TOPIC_SWITCH_1.
-    mqtt.send(TOPIC_SWITCH_1, "ON")
-        
+    # 初始化 mqtt 客户端
+    # `60` 是指在一次通信后，保持连接 60s 的时间，如果超过这个时间没有和服务器通信
+    # 服务器会认为连接已经断开，这里我们每 30s 钟 ping 一下服务器保持连接
+    mqtt = MQTTClient(CLIENT_ID, SERVER, SERVER_PORT, "user", "password", 60)
+    # 设置回调
+    mqtt.set_callback(mqtt_callback)
+    # 连接服务器
+    mqtt.connect()
+    # 订阅主题
+    mqtt.subscribe(TOPIC_SWITCH_1)
+
+    # uasyncio 是 micropython 下的多线程工具
+    loop = asyncio.get_event_loop()
+    # 开始监听
+    loop.create_task(check_message(mqtt))
+    # 每 30s ping 一下服务器
+    loop.create_task(ping_server(mqtt))
+    loop.run_forever()
+
 if __name__ == "__main__":
     main()
 ```
