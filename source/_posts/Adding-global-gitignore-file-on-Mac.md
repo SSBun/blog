@@ -1,6 +1,7 @@
 ---
 title: Adding global .gitignore file on Mac
 date: 2020-05-31 21:35:01
+hidden: true
 tags:
 categories:
 - tips
