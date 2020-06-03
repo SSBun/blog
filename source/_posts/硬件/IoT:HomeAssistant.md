@@ -3,6 +3,7 @@ title: 'IoT:HomeAssistant'
 date: 2020-05-25 11:57:45
 tags:
 - HomeAssistant
+hidden: true
 categories:
 - hardware
 ---
