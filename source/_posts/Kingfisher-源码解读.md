@@ -277,7 +277,400 @@ public private(set) var taskIdentifier: Source.Identifier.Value? {
 
 看到这里我们发现，对 mutaingSelf 的复制操作，本质上是在操作内部的 base 对象，而 base 的类型是 `KFCrossPlatformImageView` 这是一个引用类型, 值类型复制时，并不会拷贝内部的引用属性，mutatingSelf 中的 base 和 self 中的 base 还是同一个对象。那上述代码实际上都是对同一个 base 进行赋值操作, 所以这样写是没有问题的。
 
+继续往下看:
 
+```Swift
+var options = KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions + (options ?? .empty))
+let isEmptyImage = base.image == nil && self.placeholder == nil
+if !options.keepCurrentImageWhileLoading || isEmptyImage {
+    // Always set placeholder while there is no image/placeholder yet.
+    mutatingSelf.placeholder = placeholder
+}
+```
 
-## 封装为 SwiftUI 中的 View
+第一行通过配置参数生成了配置信息，这里出现的 `KingfisherManager` 是一个管理类，里面包含了对默认配置参数，图片下载器，缓存相关的配置，这里先记住它的大致作用就行了。后续的代码，是根据配置信息设置 `placeholder` 的值。
 
+```Swift
+let maybeIndicator = indicator
+maybeIndicator?.startAnimatingView()
+```
+
+这里打开图片的加载动画，`indicator` 也是一个扩展属性，它同样是通过 `runtime`  存储在 base(imageView) 当中的。他的类型 `Indicator` 是一个协议，约定了指示器的行为，具体可以查看定义。
+
+继续看:
+
+```Swift
+let issuedIdentifier = Source.Identifier.next()
+mutatingSelf.taskIdentifier = issuedIdentifier
+
+if base.shouldPreloadAllAnimation() {
+    options.preloadAllAnimationData = true
+}
+```
+
+我们在看 Source 的时候，忽略了内部定义的 `Identifier`， 我们查看的它的定义：
+
+```Swift
+public enum Identifier {
+
+    /// The underlying value type of source identifier.
+    public typealias Value = UInt
+    static var current: Value = 0
+    static func next() -> Value {
+        current += 1
+        return current
+    }
+}
+```
+
+它其实就是一个迭代器， 在 App 的声明周期内用来生成自增的 UInt 数值，不重复的数值用来表示当前加载图片的任务 ID，我猜测后续的进度和状态通知会用到这个 ID。接下来是设置了一个 `preloadAllAnimationData` 的属性，应该是动画相关的处理，后续再看。
+
+然后就是进度和状态相关的回调设置了，代码如下:
+
+```Swift
+
+if let block = progressBlock {
+    options.onDataReceived = (options.onDataReceived ?? []) + [ImageLoadingProgressSideEffect(block)]
+    }
+
+if let provider = ImageProgressiveProvider(options, refresh: { image in
+    self.base.image = image
+}) {
+    options.onDataReceived = (options.onDataReceived ?? []) + [provider]
+}
+        
+options.onDataReceived?.forEach {
+    $0.onShouldApply = { issuedIdentifier == self.taskIdentifier }
+}
+```
+
+根据字面意思，开头的 `block` 应该是进度监听的，`provider` 是图片加载的回调 （并不是图片下载完后设置图片，而是图片下载过程中，显示部分图片，图片数据不全时也可以先显示已有数据的图片，有很多的加载方法，有如从上往下逐行扫描加载，也有分隔显示数据，在逐步填充等等）。重点关注 `onDataReceived` ，点进去可以看到它的定义是 `var onDataReceived: [DataReceivingSideEffect]? = nil`, 它用来存储接收到图片数据时，会触发的各种"副作用"，这里的副作用是指用与图片下载事务本身无关，只是为了满足外界的状态处理，进而在获取到图片数据时，通知所有的监听者。我们来看看 `DataReceivingSideEffect` 是如何定义的：
+
+```Swift
+protocol DataReceivingSideEffect: AnyObject {
+    var onShouldApply: () -> Bool { get set }
+    func onDataReceived(_ session: URLSession, task: SessionDataTask, data: Data)
+}
+```
+
+定义很简单，`onShouldApply` 说明此条副作用是否还有效，为什么定义为 `block`，我们后续再看。`onDataReceived` 就是每次获取到最新的 data 时的调用了。我们再来看最后一句:
+
+```Swift
+options.onDataReceived?.forEach {
+    $0.onShouldApply = { issuedIdentifier == self.taskIdentifier }
+}
+```
+
+ 循环设置了 onDataReceived 的 onShouldApply 属性，在上面的分析中，我们知道每次执行新的任务都会生成一个新的 taskIdentifier, 这个 id 实际是设置到了 imageView 的扩展属性中去了， 到这里就能明白为什么使用 block 而不是普通的值了， 每次调用 block 都是和 imageView 当前的 taskIdentifier 进行对比，比如一个 imageView 短时间重复设置加载图片，只有最后一个加载任务的进度和数据信息会被传递出去，防止多个加载任务之间的信息错乱。
+
+上述都是进行相关的设置，接下就是图片的下载部分了，代码比较长，我直接在代码中标注相关的意思。
+
+```Swift
+// 下面会开始分析 KingfisherManager，这里分析整个加载的过程
+let task = KingfisherManager.shared.retrieveImage(
+    with: source,
+    options: options,
+    downloadTaskUpdated: { mutatingSelf.imageTask = $0 },
+    completionHandler: { result in
+    // 图片下载完成的回调
+        CallbackQueue.mainCurrentOrAsync.execute {
+            // CallbackQueue 是作者定义的枚举，内部就是根据不同的场景分别开辟不同的线程
+            maybeIndicator?.stopAnimatingView() // 关闭指示器
+            // 这里首先进行了 taskIdentifier 的判断，如果 imageView 没有 id 的话，证明没有任务或是任务已经完成
+            guard issuedIdentifier == self.taskIdentifier else {
+                // 如果没有 id 就返回错误信息
+                let reason: KingfisherError.ImageSettingErrorReason
+                do {
+                    let value = try result.get()
+                    reason = .notCurrentSourceTask(result: value, error: nil, source: source)
+                } catch {
+                    reason = .notCurrentSourceTask(result: nil, error: error, source: source)
+                }
+                let error = KingfisherError.imageSettingError(reason: reason)
+                completionHandler?(.failure(error))
+                return
+            }
+            
+            // 这里在任务结束后，把 task 和 id 置空，所有的状态传递和回调都依赖于对 id 的判断，置空后就能确保不发生异常的状态传递
+            mutatingSelf.imageTask = nil
+            mutatingSelf.taskIdentifier = nil
+            
+            switch result {
+            case .success(let value):
+                // 成功后，这里判断是否有过渡动画，不需要就设置图片并返回结果
+                guard self.needsTransition(options: options, cacheType: value.cacheType) else {
+                    mutatingSelf.placeholder = nil
+                    self.base.image = value.image
+                    completionHandler?(result)
+                    return
+                }
+                
+                // 显示过渡动画
+                self.makeTransition(image: value.image, transition: options.transition) {
+                    completionHandler?(result)
+                }
+                
+            case .failure:
+            // 下载图片失败后，如果配置中有失败图片的配置，显示错误图片
+                if let image = options.onFailureImage {
+                    self.base.image = image
+                }
+                completionHandler?(result)
+            }
+        }
+    }
+)
+mutatingSelf.imageTask = task
+// 最后返回生成的下载任务
+return task
+```
+
+以上我们逐行分析了 `imageView.kf.setImage(with: url)` 中，图片下载和设置的流程。现在大致对整个流程有了了解，接下来我们逐个分析其中使用的模块，首先我们从 `KingfisherManager` 入手，它整合了 Kingfisher 中的各个模块。
+
+## KingfisherManager 
+
+在上面的例子中，我们核心是调用 KingfisherManager  中 `retrievingImage` 方法来加载图片的，我们就从这里开始入口，逐行了解相关的作用:
+
+在分析代码之前，我是有一个疑问的，downloadTaskUpdated 用来更新 task 是为什么，调用 retrievingImage 时返回的 task 会发生变化吗？
+
+```Swift
+func retrieveImage(
+    with source: Source,
+    options: KingfisherParsedOptionsInfo,
+    downloadTaskUpdated: DownloadTaskUpdatedBlock? = nil,
+    completionHandler: ((Result<RetrieveImageResult, KingfisherError>) -> Void)?) -> DownloadTask?
+{
+    // RetrievingContext 是我们加载图片的上下文，可以查看下面的解析, 在回过头来继续往下看
+    let retrievingContext = RetrievingContext(options: options, originalSource: source)
+    // 重试上下文，主要记录重试的次数，和上次重试用户留下的信息
+    var retryContext: RetryContext?
+    
+    // 启动一个新的检索任务
+    // 这里的 `retrievingImage` 是更具体的实现，后面我们再看，这里也是更新 task 的地方，
+    // 根据 `RetrievingContext` 中的代码，可以猜测是在加载失败时，进行备用资源的替换，所有 task 也会进行更新，
+    // 这里也就能理解我的疑问，为什么中途需要进行 task 的更新操作了
+    func startNewRetrieveTask(
+        with source: Source,
+        downloadTaskUpdated: DownloadTaskUpdatedBlock?
+    ) {
+        let newTask = self.retrieveImage(with: source, context: retrievingContext) { result in                
+            handler(currentSource: source, result: result)
+        }
+        downloadTaskUpdated?(newTask)
+    }
+
+    // 加载失败时候的处理    
+    func failCurrentSource(_ source: Source, with error: KingfisherError) {
+        // 如果用户主动取消了任务，就直接返回失败
+        // Skip alternative sources if the user cancelled it.
+        guard !error.isTaskCancelled else {
+            completionHandler?(.failure(error))
+            return
+        }
+        // 如果有替代资源，就开启一个新的任务下载替代资源
+        if let nextSource = retrievingContext.popAlternativeSource() {
+            startNewRetrieveTask(with: nextSource, downloadTaskUpdated: downloadTaskUpdated)
+        } else {
+            // 如果没有替换资源，就返回错误
+            // 如果在前面的过程中没有产生过其他的错误，就返回当前错误，如果有的话，会把错误数组重新包装一下返回
+            // No other alternative source. Finish with error.
+            if retrievingContext.propagationErrors.isEmpty {
+                completionHandler?(.failure(error))
+            } else {
+                retrievingContext.appendError(error, to: source)
+                let finalError = KingfisherError.imageSettingError(
+                    reason: .alternativeSourcesExhausted(retrievingContext.propagationErrors)
+                )
+                completionHandler?(.failure(finalError))
+            }
+        }
+    }
+    // 对结果的处理
+    func handler(currentSource: Source, result: (Result<RetrieveImageResult, KingfisherError>)) -> Void {
+        switch result {
+        case .success:
+        // 成功直接返回结果
+            completionHandler?(result)
+        case .failure(let error):
+        // 这里读取配置中的重试策略, 如果不为空，会根据配置进行重试
+            if let retryStrategy = options.retryStrategy {
+                let context = retryContext?.increaseRetryCount() ?? RetryContext(source: source, error: error)
+                retryContext = context
+                
+                // 这里的 retryStrategy 是一个协议，只有一个 `retry` 方法，你来实现想要的重试策略
+                retryStrategy.retry(context: context) { decision in
+                    switch decision {
+                    case .retry(let userInfo):
+                        retryContext?.userInfo = userInfo
+                        // 重试就再次发送请求
+                        startNewRetrieveTask(with: source, downloadTaskUpdated: downloadTaskUpdated)
+                    case .stop:
+                    // 提交失败
+                        failCurrentSource(currentSource, with: error)
+                    }
+                }
+            } else {
+                // 在不进行重试的情况下，这里的操作其实和 `failCurrentSource` 中的基本一模一样
+                // Skip alternative sources if the user cancelled it.
+                guard !error.isTaskCancelled else {
+                    completionHandler?(.failure(error))
+                    return
+                }
+                if let nextSource = retrievingContext.popAlternativeSource() {
+                    // 唯独这里相比 `failCurrentSource` 多了一行记录错误信息的代码
+                    retrievingContext.appendError(error, to: currentSource)
+                    startNewRetrieveTask(with: nextSource, downloadTaskUpdated: downloadTaskUpdated)
+                } else {
+                    // No other alternative source. Finish with error.
+                    if retrievingContext.propagationErrors.isEmpty {
+                        completionHandler?(.failure(error))
+                    } else {
+                        retrievingContext.appendError(error, to: currentSource)
+                        let finalError = KingfisherError.imageSettingError(
+                            reason: .alternativeSourcesExhausted(retrievingContext.propagationErrors)
+                        )
+                        completionHandler?(.failure(finalError))
+                    }
+                }
+            }
+        }
+    }
+    // 这里是调用更加深乘次的获取资源的方法
+    return retrieveImage(
+        with: source,
+        context: retrievingContext)
+    {
+        result in
+        handler(currentSource: source, result: result)
+    }
+}
+```
+
+在以上的方法中，我们基本上已经清楚了检索图片时，成功后的处理，失败及失败后的重试操作，还有替代资源的加载。
+
+### RetrievingContext
+
+```Swift
+// 整个加载图片的上下文
+class RetrievingContext {
+    // 设置信息
+    var options: KingfisherParsedOptionsInfo
+    // 原始 Source
+    let originalSource: Source
+    // 在图片加载过程中，各个环境产生的错误
+    var propagationErrors: [PropagationError] = []
+
+    init(options: KingfisherParsedOptionsInfo, originalSource: Source) {
+        self.originalSource = originalSource
+        self.options = options
+    }
+
+    // 获取可替代的资源
+    func popAlternativeSource() -> Source? {
+        // 用户可以设置替代资源，在原 source 获取失败的情况下，会依次加载替代资源
+        guard var alternativeSources = options.alternativeSources, !alternativeSources.isEmpty else {
+            return nil
+        }
+        let nextSource = alternativeSources.removeFirst()
+        options.alternativeSources = alternativeSources
+        return nextSource
+    }
+
+    // 记录新的错误
+    @discardableResult
+    func appendError(_ error: KingfisherError, to source: Source) -> [PropagationError] {
+        let item = PropagationError(source: source, error: error)
+        propagationErrors.append(item)
+        return propagationErrors
+    }
+}
+```
+
+顺着上面的代码继续往下，最后调用的 `retrieveImage` 的定义是这样的：
+
+```Swift
+private func retrieveImage(
+    with source: Source,
+    context: RetrievingContext,
+    completionHandler: ((Result<RetrieveImageResult, KingfisherError>) -> Void)?) -> DownloadTask?
+{
+    let options = context.options
+    if options.forceRefresh {
+        return loadAndCacheImage(
+            source: source,
+            context: context,
+            completionHandler: completionHandler)?.value
+        
+    } else {
+        let loadedFromCache = retrieveImageFromCache(
+            source: source,
+            context: context,
+            completionHandler: completionHandler)
+        
+        if loadedFromCache {
+            return nil
+        }
+        
+        if options.onlyFromCache {
+            let error = KingfisherError.cacheError(reason: .imageNotExisting(key: source.cacheKey))
+            completionHandler?(.failure(error))
+            return nil
+        }
+        
+        return loadAndCacheImage(
+            source: source,
+            context: context,
+            completionHandler: completionHandler)?.value
+    }
+}
+```
+
+上面的代码的逻辑很清晰，就是根据配置，看是获取图片还是读取缓存。这里的两个核心方法，一个是获取图片 `loadAndCacheImage`， 另一个是 `retrieveImageFromCache`, 我们先从 loadAndCacheImage 入手，看看如何加载图片的：
+
+### loadAndCacheImage 加载图片并缓存
+
+```Swift
+// 定义上的意思是加载图片并缓存
+@discardableResult
+func  loadAndCacheImage(
+    source: Source,
+    context: RetrievingContext,
+    completionHandler: ((Result<RetrieveImageResult, KingfisherError>) -> Void)?) -> DownloadTask.WrappedTask?
+{
+    // 这里是一个缓存图片的方法
+    let options = context.options
+    func _cacheImage(_ result: Result<ImageLoadingResult, KingfisherError>) {
+        cacheImage(
+            source: source,
+            options: options,
+            context: context,
+            result: result,
+            completionHandler: completionHandler
+        )
+    }
+    
+    switch source {
+    case .network(let resource):
+    // 如果是网络图片，就通过 downloader 进行下载，这个 downloader 我们后续肯定会再进行详细分析
+        let downloader = options.downloader ?? self.downloader
+        let task = downloader.downloadImage(
+            with: resource.downloadURL, options: options, completionHandler: _cacheImage
+        )
+
+        if let task = task {
+            return .download(task)
+        } else {
+            return nil
+        }
+        
+        // 通过 provider 获取图片数据,
+    case .provider(let provider):
+        provideImage(provider: provider, options: options, completionHandler: _cacheImage)
+        return .dataProviding
+    }
+}
+```
+
+我们先挑简单的来， 通过 provider 获取 image 内部的代码是很简单了，`ImageDataProvider`  这个协议上面我们讲到过，内部通过 `data(handler: @escaping (Result<Data, Error>) -> Void)`  方法来获取图片，除了我们自定义以外，本地图片的获取方法就是加载本地地址而已，就不多做赘述了。
+
+#### 
