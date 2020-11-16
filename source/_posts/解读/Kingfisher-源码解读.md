@@ -5,6 +5,8 @@ tags:
 - iOS
 - Swift
 - SwiftUI
+categories:
+- 源码解读
 ---
 
 `Kingfisher` 是喵神开源的一个图片加载框架，能够加载网络，本地的多种格式的图片，并提供了缓存和动画的支持，随着 SwiftUI 的发布，`Kingfisher` 也增加了对 SwiftUI 的扩展。最近的 iOS Widget 项目中正好使用了 SwiftUI，借此机会学习一下 Kingfisher 各个部分的实现以及对 SwiftUI 的封装。
