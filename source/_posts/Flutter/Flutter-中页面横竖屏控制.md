@@ -6,6 +6,7 @@ categories:
 - Flutter
 ---
 
+![](https://ssbun-lot.oss-cn-beijing.aliyuncs.com/img/20201116115103.png)
 
 最近项目中越来越多的页面开始使用 Flutter 进行开发，这时一个棘手的问题就暴露出来，我们项目中对 Flutter 页面横竖屏的控制非常的僵硬，基本上就是在被跳转的页面的 init 方法中进行了横竖屏的设置，然后在 dispose 的时候再改回去，当初这样写的原因在于任务紧张并且团队初次使用了 Flutter 来开发，对 Flutter 中的各种机制还不是特别的了解，并且就几个页面，跳转的逻辑十分的简单，就将就了一下。
 
