@@ -1,5 +1,5 @@
 ---
-title: Kingfisher 源码解读
+title: Kingfisher 源码解读[1]
 date: 2020-11-03 14:29:22
 tags:
 - iOS
@@ -15,7 +15,7 @@ categories:
 > Github address: [Kingfiher](https://github.com/onevcat/Kingfisher)  
 > Tag: 5.15.7
 
-## Kingfisher 的主要模块?
+## Kingfisher 的主要模块
 
 ### kf 命名空间
 
@@ -103,6 +103,10 @@ extension KingfisherWrapper where Base: UIButton {
 - **Utility:** 一些帮助方法，字符串的MD5、Runtime、调用栈之类的
 - **SwiftUI:** 针对 SwiftUI 进行的扩展
 
+## 从一个例子开始解析
+
+### 最普通的调用
+
 知道了 Kingfisher 的主要结构以后，我们就从最常用的调用开始，一步步深入并研究途中遇到的各种参数和类型。最简单也是最常用的就是为 ImageView 设置一个图片，代码如下：
 
 ```Swift
@@ -139,6 +143,8 @@ public protocol Placeholder {
 ```
 
 这地方体现了面向协议编程的精髓，你无须去创造一个类型，而是描述你所需要的类型的行为，为了减轻实现的难度，这会迫使你尽可能的简化非必要的行为，最后留下的就是纯粹的定义，越是简单就越是灵活，bug 也会更少。就如同数学和物理中的公理一样，越是简单越是稳固，这样上层构建的软件才更加牢固， 此处的这个协议就精准的描述了一个 **Placeholder** 需要实现的所有行为，如何被添加，如何被删除。
+
+### 定义资源 Source
 
 然后是 `source`, 此参数顾名思义是提供图片的来源， 查看 `Source` 的实现：
 
@@ -239,6 +245,8 @@ public struct LocalFileImageDataProvider: ImageDataProvider {
 ```
 
 本地图片的路径被作为 Cache Key， 图片的获取方法，就是加载本地图片文件的数据，这就是本地图片的 Provider 实现。
+
+### 图片加载的配置
 
 最后我们来看参数 `options`， 他的类型定义是 `public typealias KingfisherOptionsInfo = [KingfisherOptionsInfoItem]`, options 中包含了图片加载的动画，动画样式，缓存管理，执行线程等等各种设置, `KingfisherOptionsInfoItem` 是一个枚举，里面列举了各种各样的设置参数，最后这个包含设置的数组会被转换为 `KingfisherParsedOptionsInfo` 这是一个结构体，属性就是 `KingfisherOptionsInfoItem` 所有的枚举值. 这里面的设置参数控制了很多的东西，继续往里分析，等遇到的时候，我们再来关注他们的作用.
 
@@ -429,7 +437,7 @@ return task
 
 以上我们逐行分析了 `imageView.kf.setImage(with: url)` 中，图片下载和设置的流程。现在大致对整个流程有了了解，接下来我们逐个分析其中使用的模块，首先我们从 `KingfisherManager` 入手，它整合了 Kingfisher 中的各个模块。
 
-## KingfisherManager 
+## 更进一步 KingfisherManager
 
 在上面的例子中，我们核心是调用 KingfisherManager  中 `retrievingImage` 方法来加载图片的，我们就从这里开始入口，逐行了解相关的作用:
 
@@ -673,6 +681,7 @@ func  loadAndCacheImage(
 }
 ```
 
-我们先挑简单的来， 通过 provider 获取 image 内部的代码是很简单了，`ImageDataProvider`  这个协议上面我们讲到过，内部通过 `data(handler: @escaping (Result<Data, Error>) -> Void)`  方法来获取图片，除了我们自定义以外，本地图片的获取方法就是加载本地地址而已，就不多做赘述了。
+根据资源的类型，首先是加载网络图片，获取到配置的下载器，开始下载图片并返回对应的 task。其中使用的 downloader 作为一个较为独立的模块，后续可以独立分析。而通过 provider 获取 image 内部的代码是很简单了，`ImageDataProvider`  这个协议上面我们讲到过，内部通过 `data(handler: @escaping (Result<Data, Error>) -> Void)`  方法来获取图片，除了我们自定义以外，本地图片的获取方法就是加载本地地址而已，就不多做赘述了。
 
-#### 
+而 `retrieveImageFromCache` 的大致行为也就是从缓存中检索图片，代码也不复杂，到现在我们至少已经了解了 Kingfisher 中图片加载和各种配置的处理操作流程，剩下的两个主要功能是非常独立的，我们将分别深入的探查它们的实现细节。
+
