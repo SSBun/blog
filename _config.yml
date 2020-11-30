@@ -3,10 +3,12 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: 阳光小屋
+title: '阳光小屋'
 subtitle: 'sunshine house'
 description: '瞎折腾、不胡闹'
 keywords:
+  - SSBun
+  - blog
 author: SSBun
 language: en
 timezone: ''
@@ -94,6 +96,7 @@ ignore:
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
 theme: cactus
+
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
