@@ -23,10 +23,6 @@
     </div>
     <div style="display: inline-block; flex: 1;"></div>
     <div class="list" style="display: inline-block; flex: 5;">     
-      <div class="progress" style="display: inline-block; width: 80%;">
-        <div class="progress-bar fifty"></div>        
-      </div>
-      <div class="arrow" style="display: inline-block; background-color: brown; width: 20px; height: 20px;" onclick="this.click"></div>
     </div>
   </div>
 </body>
@@ -62,7 +58,7 @@ function generateSkillBar(name, level) {
   progressContainer.append(progressBar)
   bar.appendChild(progressContainer)
   let content = document.createElement('div')
-  content.innerText = '使用的东西'
+  // content.innerText = '使用的东西'
   content.style.color = 'white'
   // content.style.display = 'none'
   bar.appendChild(content)
