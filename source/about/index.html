@@ -22,7 +22,7 @@
     <div class="list" style="display: inline-block; flex: 5;">
     </div>
     <div style="display: inline-block; flex: 1;"></div>
-    <div class="list" style="display: inline-block; flex: 5;">     
+    <div class="list" style="display: inline-block; flex: 5;">
     </div>
   </div>
 </body>
@@ -30,40 +30,40 @@
 <script>
 
 
-let leftItems = [['Objective-C', 'onehundred'], ['Dart', 'seventyfive'], ['Ruby', 'fifty']]
-let leftList = document.getElementsByClassName('list')[0]
-leftItems.forEach((item) => {
-  leftList.appendChild(generateSkillBar(item[0], item[1]))
-})
+  let leftItems = [['Objective-C', 'onehundred'], ['Swift', 'onehundred'], ['Dart', 'seventyfive'], ['C', 'seventyfive'], ['C++', 'twentyfive']]
+  let leftList = document.getElementsByClassName('list')[0]
+  leftItems.forEach((item) => {
+    leftList.appendChild(generateSkillBar(item[0], item[1]))
+  })
 
-let rightItems = [['Swift', 'onehundred'], ['Shell', 'seventyfive'], ['Python', 'fifty']]
-let rightList = document.getElementsByClassName('list')[1]
-rightItems.forEach((item) => {
-  rightList.appendChild(generateSkillBar(item[0], item[1]))
-})
+  let rightItems = [['Python', 'seventyfive'], ['JavaScript', 'seventyfive'], ['Shell', 'fifty'], ['TypeScript', 'fifty'],['Ruby', 'fifty']]
+  let rightList = document.getElementsByClassName('list')[1]
+  rightItems.forEach((item) => {
+    rightList.appendChild(generateSkillBar(item[0], item[1]))
+  })
 
-function click() {
-  alert('-000000000000')
-}
+  function click() {
+    alert('-000000000000')
+  }
 
-function generateSkillBar(name, level) {
-  let bar = document.createElement('div')
-  let title = document.createElement('h3')
-  title.innerText = name
-  let progressContainer = document.createElement('div')
-  bar.appendChild(title)
-  progressContainer.setAttribute('class', 'progress')
-  let progressBar = document.createElement('div')
-  progressBar.setAttribute('class', 'progress-bar ' + level)  
-  progressContainer.append(progressBar)
-  bar.appendChild(progressContainer)
-  let content = document.createElement('div')
-  // content.innerText = '使用的东西'
-  content.style.color = 'white'
-  // content.style.display = 'none'
-  bar.appendChild(content)
-  return bar
-}
+  function generateSkillBar(name, level) {
+    let bar = document.createElement('div')
+    let title = document.createElement('h3')
+    title.innerText = name
+    let progressContainer = document.createElement('div')
+    bar.appendChild(title)
+    progressContainer.setAttribute('class', 'progress')
+    let progressBar = document.createElement('div')
+    progressBar.setAttribute('class', 'progress-bar ' + level)
+    progressContainer.append(progressBar)
+    bar.appendChild(progressContainer)
+    let content = document.createElement('div')
+    // content.innerText = '使用的东西'
+    content.style.color = 'white'
+    // content.style.display = 'none'
+    bar.appendChild(content)
+    return bar
+  }
 
 </script>
 
