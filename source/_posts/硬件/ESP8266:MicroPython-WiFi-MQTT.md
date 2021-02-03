@@ -8,6 +8,8 @@ tags:
 - MQTT
 categories:
 - hardware
+marks:
+- ESP8266
 ---
 
 ![](https://ssbun-lot.oss-cn-beijing.aliyuncs.com/img/20200525174425.png)

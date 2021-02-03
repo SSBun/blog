@@ -6,6 +6,8 @@ tags:
 - MicroPython
 categories:
 - hardware
+marks:
+- ESP8266
 ---
 
 ## 安装 MicroPython 到 ESP8266

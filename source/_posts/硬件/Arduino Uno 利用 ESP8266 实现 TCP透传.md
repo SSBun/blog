@@ -7,6 +7,9 @@ tags:
 - TCP
 categories:
 - hardware
+marks:
+- ESP8266
+- Arduino
 ---
 
 利用 Arduino Uno 的软串口和 ESP8266 进行通信，为 Arduion Uno 提供连接 WiFi 的能力。
