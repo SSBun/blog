@@ -168,3 +168,84 @@ tags:
     - Before we start writing codes, we should take the structure of the application apart carefully.
 - `to easily defeat someone or a team`    
     - I took the man stealing my cell phone apart in the morning.
+
+### TAKE AWAY
+![](https://ssbun-lot.oss-cn-beijing.aliyuncs.com/img/20210420105438.png)
+
+- `to remove`
+    - The lost boy had been crying a half-hour in the police station and then was taken away by his parents.
+- `to make something disappear`
+    - You can imagine cranberries to take away your thirst.
+- `to subtract`
+    - A hundred take away ninety-nine is one.
+
+### TAKE BACK
+![](https://ssbun-lot.oss-cn-beijing.aliyuncs.com/img/20210420111759.png)
+
+- `to retract something you said`
+    - It's too late to retract your command, I have already done it.
+- `to return something`
+    - The store doesn't allow me to take back my mobile phone, because I have opened the box. But how can I know it is damaged if I didn't open the box.
+- `to remind you of another time`
+    - The song take me back to my student times.
+- `to resume a relationship`    
+    - You made a big mistake and can't take me back in any way.
+
+### TAKE DOWN
+![](https://ssbun-lot.oss-cn-beijing.aliyuncs.com/img/20210420122208.png)
+
+- `to write something down`
+    - `You should take the important knowledge down during studying English.`
+- `to remove`    
+    - I can't take down the color on my jacket.
+- `to lower something`    
+    - The flag id dirty. We should take the flag down to clean it.
+- `to defeat someone`    
+    - We can impossible take the opponent down. He is too strong.            
+
+### TAKE FOR
+![](https://ssbun-lot.oss-cn-beijing.aliyuncs.com/img/20210420131528.png)
+
+- `to consider / to regard`
+    - The tiger doesn't show the power, you take it for a sick kitty.
+
+### TAKE IN
+![](https://ssbun-lot.oss-cn-beijing.aliyuncs.com/img/20210420132700.png)
+
+- `to view your surroundings and absorb it`
+    - The mountain is so beautiful. I want to stay here and take in the view forever.
+- `to give shelter`    
+    - The old man took in nine orphans.
+- `to deceive someone`
+    - Don't be taken in by his appearance. His a bad man.
+- `to reduce the size of a piece of clothing`
+    - The pants I bought last week is too long to me. I need to take them in.
+- `to understand and absorb information`    
+    - This video has a lot of information. I can't take in all at once.
+
+### TAKE OFF
+![](https://ssbun-lot.oss-cn-beijing.aliyuncs.com/img/20210420161421.png)
+
+- `to leave the ground and begin to fly`
+    - The seaplanes can take off on the water.
+- `to remove (clothing / things)`
+    - She took all her clothes off in the street last night.
+- `to leave a place (quickly)`
+    - I've not walked too near here yet. All of the fishes have taken off.
+- `to become a popular or successful`    
+    - Since I saved a little girl. I have taken off in my town.
+- `to not work for a period of time`
+    - I took one week off work for my English exam.
+
+### TAKE ON
+![](https://ssbun-lot.oss-cn-beijing.aliyuncs.com/img/20210420163742.png)
+
+- `to accept additional responsibility`
+    - I wouldn't take on more works, unless you give me more money.
+- `to add; to acquire`    
+    - Most men of China take on a lot of mortgage before they are married.
+- `to fight or complete against`
+    - I don't think you should take on with the man. You must be fail.
+- `to begin to have the appearance of`
+    - My mother took on a more angry tone with me.
+    
