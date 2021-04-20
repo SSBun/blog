@@ -248,4 +248,19 @@ tags:
     - I don't think you should take on with the man. You must be fail.
 - `to begin to have the appearance of`
     - My mother took on a more angry tone with me.
-    
+
+### TAKE OUT
+![](https://ssbun-lot.oss-cn-beijing.aliyuncs.com/img/20210420184412.png)
+
+- `to borrow something from a place`
+    - Can I take out your laptop to send an email to my teacher?
+- `to remove`
+    - I don't want studying. I have taken all my books out.
+- `to invite someone to go somewhere`    
+    - I want to take you out to a restaurant. It's food is delicious.
+- `to withdraw`    
+    - I can't take out any cash because I have forgotten my password.
+-  `to destroy or kill`    
+    - Before he was a killer, he had taken out many people.
+
+###     
