@@ -263,4 +263,47 @@ tags:
 -  `to destroy or kill`    
     - Before he was a killer, he had taken out many people.
 
-###     
+### TAKE OVER
+![](https://ssbun-lot.oss-cn-beijing.aliyuncs.com/img/20210423104135.png)
+
+- `to begin control of something`
+    - Your are the best teacher. No-one can take over for you.
+- `to buy out the ownership of a company`    
+    - We need to think of a way quickly to stop our company from being taken over.
+- `to conquer`
+    - Japan and Korea were taken over by China one hundred years ago.
+
+### TAKE TO
+![](https://ssbun-lot.oss-cn-beijing.aliyuncs.com/img/20210423105815.png)
+
+- `to make a new habit of something`
+    - I have taken to reading English in the morning.
+- `to develop an ability for something`    
+    - I took to running very quickly.
+- `to move towards or go from a place`
+    - The suspect took to the gun when the polices came in.
+    
+### TAKE UP
+![](https://ssbun-lot.oss-cn-beijing.aliyuncs.com/img/20210423124240.png)
+
+- `to fill or occupy time or space`
+    - There are two desktops take up a lot of space in my bathroom.
+- `to start a new hobby or interest`
+    - I took up playing basketball when I was a high school student.
+- `to make a piece of clothing shorter`
+    - Your pants look too long. You should take them up.
+- `to resume after an interruption`
+    - The downloading task takes up where the downloader canceled it last time.
+- `to address an issue`    
+    - You can't cut down this tree. You must take up this with your neighbors.
+
+## Phrasal Verbs with Animals
+
+### PIG OUT
+![](https://ssbun-lot.oss-cn-beijing.aliyuncs.com/img/20210423142735.png)
+
+- `to eat too much / to eat excessively`
+    - `pig out` (don't mention the food)
+        - I pigged out at breakfast.
+    - `pig out on + name of food`
+        - I pigged out on egg at breakfast.        
