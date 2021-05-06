@@ -168,4 +168,76 @@ In the function `drawing`, the loop executes four times. so the components of th
 It's used in the compiler available expressions (`#available`). If we use a available condition expression in a result builder. The result value might contains the type info about the unavailable type. This could cause your program to crash. But it's rare scene, I don't want to deep it. You can read [the apple document](https://docs.swift.org/swift-book/ReferenceManual/Attributes.html#ID633) to get more detail about it.
 
 
-## 
+## Where we can use ResultBuilder ?
+
+### Function
+```Swift
+@DrawingBuilder
+func drawing(count: Int) -> Drawable {
+    Stars(length: 10)
+    for i in 0...count {
+        Stars(length: i)
+        Stars(length: i * 10)
+    }
+}
+print(drawing(count: 10).draw())
+```
+
+> Using result builder syntax in the method's body
+
+### Function Block Parameter
+
+```Swift
+func draw(@DrawingBuilder componentsBuilder: () -> Drawable) -> String {
+    componentsBuilder().draw()
+}
+
+let content = draw {
+    Stars(length: 2)
+    Space()
+    Text("12345")
+}
+
+print(content)
+```
+
+> Using result builder syntax in the method's parameter when you invoke it.
+
+### Property
+
+```Swift
+struct Canvas {
+    @DrawingBuilder
+    var someStars: Drawable // Storage Property
+    
+    @DrawingBuilder
+    var dog: Drawable {
+        // Computed Property
+        Stars(length: 2)
+        Space()
+        Text("dog")
+        Space()
+        Stars(length: 2)
+    }
+    
+    mutating func updateStars() {
+        someStars = Stars(length: 2)
+    }
+}
+
+var canvas = Canvas { // Can directly use the ResultBuilder to initialize.
+    Stars(length: 2)
+    Space()
+    Stars(length: 2)
+}
+
+print(canvas.someStars.draw())
+print(canvas.dog.draw())
+```
+
+There are two usages. The one is used at a computed property (dog). It's easy to understand, just like using it in a no parameters function.
+
+At the storage properties. When the type is a struct, the default constructor of it will automatically transform the init param to `() -> Drawable` (Be declared like the ResultBuilder used in the block params of a function)
+
+You can't declare a storage property with ResultBuilder in Class. The `ResultBuilder` requires the property has a getter. But you can use it at the computed properties in Class.
+
