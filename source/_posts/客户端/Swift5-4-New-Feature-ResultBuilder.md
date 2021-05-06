@@ -6,9 +6,9 @@ tags:
 - Swift Updates
 ---
 
-Recently, the Apple team released the new Swift version 5.4. In this update, Swift imports some new syntax. One of them most important I think of is `ResultBuilder`. Actually, this `ResultBuilder` has already can be used in previous Swift versions. But it's name is `_functionBuilder`. In SwiftUI, Apple often uses it as the Container View's constructor's property. The `body` property in SwiftUI is also declared with it. 
+Recently, the Apple team released the new Swift version 5.4. In this update, Swift imports some new syntax. One of them most important I think of is `ResultBuilder`. Actually, this `ResultBuilder` has already can be used in previous Swift versions. But it's name is `_functionBuilder`. In SwiftUI, Apple often uses it as the constructor parameter of Container Views . The `body` property in SwiftUI is also declared with it. 
 
-But as you think of, the `_functionBuilder` has a underline prefix, this means Apple doesn't want to us using this syntax. Today, the finished version of the `_functionBuilder` is coming. It provides more functions than _functionBuilder. 
+But as you think of, the `_functionBuilder` has a underline prefix, this means Apple doesn't want to us using this syntax. Today, the finished version of the `_functionBuilder` is coming. It provides more function than _functionBuilder. 
 
 ## What's the problem resolved by ResultBuilder ?
 
