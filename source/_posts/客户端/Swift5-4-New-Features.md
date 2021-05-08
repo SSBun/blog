@@ -3,6 +3,8 @@ title: Swift5.4 New Features
 date: 2021-05-07 14:26:26
 tags:
 - Swift
+categories:
+- Swift
 ---
 
 In the last article, we have understood the result builder transforms. There're some other small changes in the new Swift version.
