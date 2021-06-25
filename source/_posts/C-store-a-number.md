@@ -10,7 +10,7 @@ mark:
 Before learning how to store an integer in memory, first we review some information about the integer in memory. In current modern computer system, the integer usually have three kinds of length, `int`, `short int` and `long int`.  In 64 bits system, the `int` generally occupies 4 bytes memory space, the `short int` needs 2 bytes, the `long int` needs 8 bytes in Linux/Mac or 4 bytes in Windows. If the integer is having sign, the highest bit of the integer binary is the sign bit. Sign bit is one means the integer is negative, zero means positive.
 
 ## How to store an Integer in Memory?
-The simplest way to storing a integer is just to saving the binary of the integer, but in modern computer systems, they save the integers without this way. The reason is about the subtraction of integers. Form our point of view, the subtraction is similar to the addition, if you know how to calculate a addition, you must know how to calculate a subtraction. But in computer systems, in hardwares, the addition and the subtraction are two distinct operations, so the engineers need to design two different circuits to implement them, this is too complex. 
+The simplest way to storing a integer is just to saving the binary of the integer, but in modern computer systems, they save the integers without this way. The reason is about the subtraction of integers. From our point of view, the subtraction is similar to the addition, if you know how to calculate a addition, you must know how to calculate a subtraction. But in computer systems, in hardwares, the addition and the subtraction are two distinct operations, so the engineers need to design two different circuits to implement them, this is too complex. 
 
 The simplest is the best. The smart scientists begin to think how to merge the subtraction and the addition to one operation. Finally, they implement a new storing format for integers, there are three concepts we should know:
 
@@ -58,7 +58,7 @@ For positive, the complement code is equal to the reverse code and original code
 > If we make the sign bit join the calculation, can only get an error answer.
 
 
-### If we add the original codes of the `6` and `-18`, what's will happen?
+### If we add the reverse codes of the `6` and `-18`, what's will happen?
 - = `6 + (-18)`
 - = `0000 0000 0000 0110`<sub>reverse</sub> + `1111 1111 1110 1101`<sub>reverse</sub>
 - = `1111 1111 1111 0011`<sub>reverse</sub>
