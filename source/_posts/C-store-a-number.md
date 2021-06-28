@@ -82,10 +82,10 @@ If we calculate a large number minus a small number, we know the result is one l
 
 > The complement code is a genius-like design that greatly reducing the complexity of the circuit
 
-## The value range of integer
+## The value range of integers
 The `short`, `int` and `long` are the common integer types in C. They can only store a limited length integer, if the integer is too long, the over part would be cut, the final value saved would be error, we say this situation as `overflow`. 
 
-### The value range of unsigned integer
+### The value range of unsigned integers
 
 For easily to calculate, we make an example with `short int`. The `short int` occupy a bytes, eight bits, to store an integer, setting all bits to 1 is the max value, setting all bits to 0 is the min value. The max value `1111 1111` is equal to `2^8 - 1 = 255`, we use a small trick to fleetly calculate the max value, the value of `1111 1111` is not easy to get, we can add 1 to it to get the result `1 0000 0000` and then minus 1. 
 
@@ -96,7 +96,7 @@ For easily to calculate, we make an example with `short int`. The `short int` oc
 | unsigned int   | 4 bytes | `0`       | `2^32 - 1 = 4,294,967,295 ≈ 4.2 billion` |
 | unsigned long  | 8 bytes | `0`       | `2^64 - 1 ≈ 1.84*10^19`                  |
 
-### The value range of signed integer
+### The value range of signed integers
 
 | complement code | reverse code | original code | value  |
 |-----------------|--------------|---------------|--------|
