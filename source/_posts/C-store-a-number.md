@@ -81,3 +81,62 @@ The complement code is the reverse code plus one. If we calculate a small number
 If we calculate a large number minus a small number, we know the result is one less than the correct answer when calculating them with the reverse codes. If we use the complement code, because the complement code is reverse code plus one and the answer is positive that we don't need to revert it again. Finally the result is equal to the correct answer.
 
 > The complement code is a genius-like design that greatly reducing the complexity of the circuit
+
+## The value range of integer
+The `short`, `int` and `long` are the common integer types in C. They can only store a limited length integer, if the integer is too long, the over part would be cut, the final value saved would be error, we say this situation as `overflow`. 
+
+### The value range of unsigned integer
+
+For easily to calculate, we make an example with `short int`. The `short int` occupy a bytes, eight bits, to store an integer, setting all bits to 1 is the max value, setting all bits to 0 is the min value. The max value `1111 1111` is equal to `2^8 - 1 = 255`, we use a small trick to fleetly calculate the max value, the value of `1111 1111` is not easy to get, we can add 1 to it to get the result `1 0000 0000` and then minus 1. 
+
+|                | bytes   | min value | max value                                |
+|----------------|---------|:----------|------------------------------------------|
+| unsigned char  | 1 byte  | `0`       | `2^8 - 1 = 255`                          |
+| unsigned short | 2 bytes | `0`       | `2^16 - 1 = 65,535 ≈ 65 thousand`        |
+| unsigned int   | 4 bytes | `0`       | `2^32 - 1 = 4,294,967,295 ≈ 4.2 billion` |
+| unsigned long  | 8 bytes | `0`       | `2^64 - 1 ≈ 1.84*10^19`                  |
+
+### The value range of signed integer
+
+| complement code | reverse code | original code | value  |
+|-----------------|--------------|---------------|--------|
+| 1111 1111       | 1111 1110    | 1000 0001     | -1     |
+| 1111 1110       | 1111 1101    | 1000 0010     | -2     |
+| 1111 1101       | 1111 1100    | 1000 0011     | -3     |
+| ...             | ...          | ...           | ...    |
+| 1000 0011       | 1000 0010    | 1111 1101     | -125   |
+| 1000 0010       | 1000 0001    | 1111 1110     | -126   |
+| 1000 0001       | 1000 0000    | 1111 1111     | -127   |
+| `1000 0000`     | --           | --            | `-128` |
+| 0111 1111       | 0111 1111    | 0111 1111     | 127    |
+| 0111 1110       | 0111 1110    | 0111 1110     | 126    |
+| 0111 1101       | 0111 1101    | 0111 1101     | 125    |
+| ...             | ...          | ...           | ...    |
+| 0000 0010       | 0000 0010    | 0000 0010     | 2      |
+| 0000 0001       | 0000 0001    | 0000 0001     | 1      |
+| 0000 0000       | 0000 0000    | 0000 0000     | 0      |
+
+Also use the `short int` as the example, the singed integer is stored with the complement code format in the memory. The complement codes are from `0000 0000` to `1111 1111`, in the period from `0000 0000` to `0111 1111` the values are positive **(0 to 127)**, in the period from `1000 0001` to `1111 1111` the values are negative **(-127 to -1)**.
+
+ You might find that there is no the code `1000 0000`, this because the hightest bit of the complement code is 1, so it's a negative value and we should minus one from it to transform it to the reverse code. But all bits of it are zero, so it have to borrow an one to the hightest bit. The hightest bit is signed bit that can not be changed. Now we know the complement code `1000 0000` can not be convert to a integer, how do we deal with this value? Discarding the value is too wasteful, people specific the value as the number `-128 `. 
+
+### Value overflow
+
+The integer types `char`, `short`, `int` and `long` have limited length, the over bits would be discarded when you assign a very large value. When occurring overflow, as some hightest bits are ignored, the result will be very strange.
+
+Let's see an example:
+
+```c++
+#include <stdio.h>
+int main()
+{
+    unsigned int a = 0x100000000;
+    int b = 0xffffffff;
+    printf("a=%u, b=%d\n", a, b);
+    return 0;
+}
+```
+
+The variable `a` is an `unsigned int`, so its length is 4 bytes, the max value of it is `0xFFFFFFFF`. The assigned value `0x100000000` is equal to `0xFFFFFFFF + 1` and over the value range of the `unsigned int`, so the hightest bit will be cut, all the remaining bits are 0. So that the value of the variable `a` is 0 in the memory.
+
+The variable `b` is a `signed int`, its value is saved in the memory with complement format. The count of its value bit is 31, but the assigned value is `0xFFFFFFFF` that has 32 bits, so the highest bit will be overwritten to 1, then we get the complement value of the `b` is `0xFFFFFFFF`. Converting to original code, we can get the value is `-1`.
