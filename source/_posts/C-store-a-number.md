@@ -1,5 +1,5 @@
 ---
-title: How to store a Number in the Memory?
+title: How to store an integer in the Memory?
 date: 2021-06-21 15:51:05
 tags:
 - C
