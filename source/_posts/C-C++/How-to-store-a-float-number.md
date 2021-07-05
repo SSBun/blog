@@ -4,6 +4,8 @@ date: 2021-06-29 10:28:24
 tags:
 - Memory
 - C-Basic
+marks:
+- BASIS
 ---
 
 In C language, the decimal numbers have two lengths, `float` and `double`. Their lengths are constraint compared with integers, the `float` occupies **4 bytes** and the `double` needs **8 bytes**. 

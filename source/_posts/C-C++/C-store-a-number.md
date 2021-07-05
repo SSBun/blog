@@ -4,7 +4,8 @@ date: 2021-06-21 15:51:05
 tags:
 - C
 - Memory
-mark:
+marks:
+- BASIS
 ---
 
 Before learning how to store an integer in memory, first we review some information about the integer in memory. In current modern computer system, the integer usually have three kinds of length, `int`, `short int` and `long int`.  In 64 bits system, the `int` generally occupies 4 bytes memory space, the `short int` needs 2 bytes, the `long int` needs 8 bytes in Linux/Mac or 4 bytes in Windows. If the integer is having sign, the highest bit of the integer binary is the sign bit. Sign bit is one means the integer is negative, zero means positive.
